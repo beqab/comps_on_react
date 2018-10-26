@@ -1,7 +1,17 @@
 import React, { Component } from 'react';
 import {NavLink} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 class Header extends Component {
+  componentDidMount(){
+
+    console.log(this.props.menu, 'from header')
+  }
+  componentWillReceiveProps(){
+    console.log(this.props.menu, 'from header')
+
+  }
+  componentD
     render() {
         return (
             <header className="">
@@ -43,4 +53,10 @@ class Header extends Component {
     }
 }
 
-export default Header;
+const mapStateToProps = (state) => {
+  return {
+    menu : state.start_data
+  }
+}
+
+export default connect(mapStateToProps)(Header);

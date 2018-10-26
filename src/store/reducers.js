@@ -1,6 +1,6 @@
 import * as actionTypes from './actions';
 const initialState = {
-       start_data: {},
+       start_data: null,
        test: 'from state'
 }
 

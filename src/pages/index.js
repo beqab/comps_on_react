@@ -3,7 +3,7 @@ import Header from '../inc/header'
 import Footer from '../inc/footer';
 import axios from 'axios';
 import {connect} from 'react-redux';
-import * as actionTypes from '../store/actions'
+import * as actionTypes from '../store/actions';
 
 class Index extends Component {
     componentDidMount(){
@@ -187,13 +187,7 @@ class Index extends Component {
 
 </div>
 
-
-
-
-
-
  <Footer/>
-
         
       </div>
     );
@@ -208,7 +202,12 @@ const mapStateToProps = state =>{
 
 const mapDispatchToProps = dispatch =>{
      return{
-         fetchdata : (dd) => dispatch(actionTypes.FetchStartData(dd)),
+         fetchdata : async () => 
+         await   axios.get('https://comps-cee0a.firebaseio.com/mrnu.json') 
+         .then(resp => {
+            dispatch(actionTypes.FetchStartData(resp.data))
+         })
+         
      }
 }
 
