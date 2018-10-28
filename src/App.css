@@ -21,6 +21,9 @@ a:hover{
 ul{
  list-style: none;
 }
+.passwordError{
+  border: 2px solid #d42d2d;
+}
 a{
  text-decoration: none;
 }
