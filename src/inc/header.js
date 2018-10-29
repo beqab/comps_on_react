@@ -1,20 +1,13 @@
 import React, { Component } from 'react';
 import {NavLink, Link} from 'react-router-dom';
 import {connect} from 'react-redux';
-import * as authActions from '../store/actions/authActions'
+import * as authActions from '../store/actions/authActions';
+import {Redirect, withRouter} from 'react-router-dom'
 class Header extends Component {
-  // componentDidMount(){
-
-  //   console.log(this.props.menu, 'from header')
-  // }
-  // componentWillReceiveProps(){
-  //   console.log(this.props.menu, 'from header')
-
-  // }
-  componentD
     render() {
         return (
             <header className="">
+           
        <h1> კომპიუტერული სერვისები და მეორადი კომპიუტერული ტექნიკა</h1>
                 <nav className="navbar navbar-default">
   <div className="container-fluid">
@@ -44,12 +37,18 @@ class Header extends Component {
         </div>
         <button type="submit" className="btn btn-default"><i className="fa fa-search" aria-hidden="true"></i></button>
 
-        { !this.props.isAuth ?
+        { !this.props.isAuth && !this.props.userInfo ?
          <div>
            <NavLink exact  to="/auth"> ავტორიზაზცია </NavLink>
            <NavLink exact  to="/reg"> რეგისტრაცია </NavLink> 
            </div>
-           : <span onClick={() => this.props.logoutAction()}>გამოსვლა</span> }
+           :
+           <div>
+             <div> მომხმარებელი : {this.props.userInfo}  </div>
+           <span onClick={() => this.props.logoutAction()}>გამოსვლა</span>
+           {/* <Redirect  to='/'  /> */}
+           </div>
+            }
       </form>
       
     </div>
@@ -63,7 +62,8 @@ class Header extends Component {
 const mapStateToProps = (state) => {
   return {
     menu : state.testReducer.start_data,
-    isAuth: state.authReducer.token
+    isAuth: state.authReducer.token,
+    userInfo: state.authReducer.userInfo
 
   }
 }

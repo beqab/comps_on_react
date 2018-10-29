@@ -2,13 +2,19 @@ import React, {Component} from 'react';
 import {NavLink} from 'react-router-dom';
 import Header from "../inc/header";
 import axios from 'axios';
+import Spiner from '../UI/spiner';
+import {connect} from 'react-redux';
+import * as authAcrions from '../store/actions/authActions'
 
 class Registration extends Component {
  
   state = {
       email:null,
-      password:null,
-      error:false,
+			password:null,
+			name:null,
+			surname:null,
+			error:false,
+			success: false,
   }
   componentDidMount(){
   
@@ -26,28 +32,40 @@ class Registration extends Component {
     e.preventDefault();
     let data = {
       email: this.state.email,
-      password:this.state.password,
+			password:this.state.password,
+			name: this.state.name,
+			surname: this.state.surname,
       returnSecureToken:true,
     }
     if(data.email && data.password.length > 6 ){
-    axios.post("https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyCGo3gnBO7rBthSOWAI1x-cstE749-Gx3g", data)
+		  let seandReg = async () => {
+      this.props.startLoad()
+    await axios.post("https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyCGo3gnBO7rBthSOWAI1x-cstE749-Gx3g", data)
     .then(resp => {
-console.log(resp)
+			console.log(resp)
+			this.setState({
+				success:true
+			})
+			this.props.endLoad()
     })
     .catch(err => {
-      console.log(err)
+			this.props.endLoad()
+      alert(`err.response.data.error.message`)
     })
     console.log('seand')
     this.setState({
       error:false,
     })
-  }
+	}
+	seandReg()
   if(data.password.length < 6 ){
     this.setState({
       error:true,
     })
-  }
-  }
+	}
+}
+	}
+  
   render(){
   return (
     <div  style={{background:'#040111',height: '100vh'}}>
@@ -70,47 +88,24 @@ console.log(resp)
 					<div className="panel-body">
 						<div className="row">
 							<div className="col-lg-12">
-								{/* <form id="login-form" action="https://phpoll.com/login/process" method="post" role="form" style={{display: 'block'}}>
-									<div className="form-group">
-										<input type="text" name="username" id="username" tabindex="1" className="form-control" placeholder="Username" value="" />
-									</div>
-									<div className="form-group">
-										<input type="password" name="password" id="password" tabindex="2" className="form-control" placeholder="Password" />
-									</div>
-									<div className="form-group text-center">
-										<input type="checkbox" tabindex="3" className="" name="remember" id="remember" />
-										<label for="remember"> Remember Me</label>
-									</div>
-									<div className="form-group">
-										<div className="row">
-											<div className="col-sm-6 col-sm-offset-3">
-												<input type="submit" name="login-submit" id="login-submit" tabindex="4" className="form-control btn btn-login" value="Log In" />
-											</div>
-										</div>
-									</div>
-									<div className="form-group">
-										<div className="row">
-											<div className="col-lg-12">
-												<div className="text-center">
-													<a href="https://phpoll.com/recover" tabindex="5" className="forgot-password">Forgot Password?</a>
-												</div>
-											</div>
-										</div>
-									</div>
-								</form> */}
+							{this.props.loader ?	<Spiner/> : null}
+						 {this.state.success ?<center> რეგისტრაცია წარმატებით განხორციელდა </center> :null }  
+							
 								<form onSubmit={(e)=> this.letsRegister(e)} id="register-form"  >
-									{/* <div className="form-group">
-										<input onChange={} type="text"  name="username" id="username"className="form-control" placeholder="Username" />
-									</div> */}
+						
 									<div className="form-group">
 										<input  onChange={(e) => this.enterFilde(e)} type="email" name="email" id="email" className="form-control" placeholder="Email Address" />
 									</div>
 									<div className="form-group">
+										<input  onChange={(e) => this.enterFilde(e)} type="text" name="name" id="name" className="form-control" placeholder="სახელი" />
+									</div>
+									<div className="form-group">
+										<input  onChange={(e) => this.enterFilde(e)} type="text" name="surname" id="name" className="form-control" placeholder="გვარი" />
+									</div>
+									<div className="form-group">
 										<input onChange={(e) => this.enterFilde(e)} type="password" name="password" id="password"  className={this.state.error ? "passwordError form-control btn" : "form-control" } placeholder="Password" />
 									</div>
-									{/* <div className="form-group">
-										<input type="password" name="confirm-password" id="confirm-password"  className="form-control" placeholder="Confirm Password" />
-									</div> */}
+								
 									<div className="form-group">
 										<div className="row">
 											<div className="col-sm-6 col-sm-offset-3">
@@ -134,4 +129,18 @@ console.log(resp)
 };
 };
 
-export default Registration;
+const mapStateToProps = state => {
+	  return {
+			loader: state.authReducer.loader
+		}
+}
+
+
+const mapDispachToProps = dispach => {
+	 return{
+				startLoad: () => dispach(authAcrions.loadingData()),
+				endLoad : () => dispach(authAcrions.stopLoading())
+	 }
+}
+
+export default connect(mapStateToProps,mapDispachToProps)(Registration);

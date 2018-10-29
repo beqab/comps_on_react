@@ -1,18 +1,17 @@
 import React, {Component} from 'react';
-import {NavLink} from 'react-router-dom';
+import {NavLink, Redirect, withRouter} from 'react-router-dom';
 import Header from "../inc/header";
 import axios from 'axios';
 import {connect} from 'react-redux';
-import * as authActions from '../store/actions/authActions'
+import * as authActions from '../store/actions/authActions';
+import Spiner from '../UI/spiner'
+
 class Registration extends Component {
  
   state = {
-      email:null,
-      password:null,
+      email:{},
+      password:{},
       error:false,
-  }
-  componentDidMount(){
-  
   }
   enterFilde = (e) => {
     let elementName = e.target.name
@@ -30,19 +29,34 @@ class Registration extends Component {
       password:this.state.password,
       returnSecureToken:true,
     }
-    if(data.email && data.password.length > 6 ){
+    if(data.email && data.password.length >= 6 ){
 		
-    this.props.saveUserData(data)
-    console.log('seand')
-    this.setState({
-      error:false,
-    })
-  }
-  if(data.password.length < 6 ){
-    this.setState({
-      error:true,
-    })
-  }
+    let featch = async () => {
+			await  this.props.saveUserData(data)
+			let token = { idToken : this.props.token}
+	     axios.post('https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=AIzaSyCGo3gnBO7rBthSOWAI1x-cstE749-Gx3g', token) 
+			.then(resp => {
+				 this.props.saveUserInfo(resp.data.users[0].email)
+				 localStorage.setItem('userInfo', resp.data.users[0].email )
+				this.props.history.replace('/')
+			})
+			.catch(err =>{
+					console.log(err)
+			})
+		}
+		featch()
+    
+		this.setState({
+			error:false,
+		})
+	}
+	
+	else{
+		this.setState({
+			error:true,
+		})
+	}
+ 
   }
   render(){
   return (
@@ -66,13 +80,15 @@ class Registration extends Component {
 					</div>
 					<div className="panel-body">
 						<div className="row">
-							<div className="col-lg-12">
-								<form  onSubmit={(e)=> this.letsRegister(e)} id="login-form" action="https://phpoll.com/login/process" method="post" role="form" style={{display: 'block'}}>
+							<div className="col-lg-12 authFormParent">
+							{ this.props.loader ?  <Spiner/> : null}	 
+								<form  onSubmit={(e)=> this.letsRegister(e)} id="login-form" action="https://phpoll.com/login/process" method="post" role="form" style={{display: this.props.loader ?  "none" : 'block' }}>
+							
 									<div className="form-group">
 										<input  onChange={(e) => this.enterFilde(e)} type="text" name="email" id="username"  className="form-control" placeholder="email"/>
 									</div>
 									<div className="form-group">
-										<input onChange={(e) => this.enterFilde(e)} type="password" name="password" id="password"  className="form-control" placeholder="Password" />
+										<input onChange={(e) => this.enterFilde(e)} type="password" name="password" id="password"  className="form-control" placeholder="Password" style={{borderColor: this.state.error ? 'red':    '#ccc' }} />
 									</div>
 									<div className="form-group text-center">
 										<input type="checkbox"  className="" name="remember" id="remember" />
@@ -133,25 +149,32 @@ class Registration extends Component {
 
 const mapStateToProps = state =>{
 	 return{
-
+		 token: state.authReducer.token,
+		 loader: state.authReducer.loader
 	 }
 }
 
 const mapDispatchToProps = dispatch => {
 	  return{
 			saveUserData : async (data) =>{
+			  dispatch(authActions.loadingData())
 				await   axios.post("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyCGo3gnBO7rBthSOWAI1x-cstE749-Gx3g", data)
 				.then(resp => {
 		console.log(resp)
 		localStorage.setItem('token', resp.data.idToken)
 		dispatch(authActions.resaveUser(resp.data.idToken))
-				})
-				.catch(err => {
-					console.log(err)
-					dispatch(authActions.resaveUser())
+		dispatch(authActions.checkAuthTimeout(resp.data.expiresIn))
+		dispatch(authActions.stopLoading())
+	})
+	.catch(err => {
+		// alert('errr')
+		console.log(err)
+		// dispatch(authActions.resaveUser())
+		dispatch(authActions.stopLoading())
 				})
 			
-			}
+			},
+			saveUserInfo: (data) => dispatch(authActions.saveUserInfo(data))
 		}
 }
-export default connect(mapStateToProps, mapDispatchToProps)(Registration);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Registration));

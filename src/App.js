@@ -1,17 +1,21 @@
 import React, { Component } from 'react';
 import {BrowserRouter} from 'react-router-dom';
-import {Provider} from 'react-redux';
-import {createStore} from 'redux';
-import combineReducer from './store/reducer/combineReducer'
+
 import Router from './routers/router'
 import './App.css';
+import {connect} from 'react-redux';
+import * as authAction from './store/actions/authActions' ;
 
-const store = createStore(combineReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 
 class App extends Component {
+   
+    componentDidMount(){
+         this.props.storeToState()
+    }
+
   render() {
     return (
-      <Provider store={store}>
+     
       <BrowserRouter>
       <div className="App">
       <Router/>
@@ -19,9 +23,15 @@ class App extends Component {
       </div>
 
       </BrowserRouter>
-        </Provider>
+        
     );
   }
 }
-
-export default App;
+const mapDispatchToProps = (dispatch) =>{
+  let tooken = localStorage.getItem('token')
+  let userInfo = localStorage.getItem('userInfo')
+return{
+    storeToState: () => dispatch(authAction.resaveUser(tooken, userInfo))
+}
+}
+export default connect(null,mapDispatchToProps)(App);

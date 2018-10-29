@@ -17,11 +17,16 @@ class Index extends Component {
 
             console.log(this.props, 'index_test')
     }
+
+    letsTest = () => {
+        let token ={idToken: this.props.token}
+        this.props.fetchdata(token)
+    }
     
   render() {
     return (
       <div className="index">
-      <button onClick={() => this.props.fetchdata('test')}>ffff </button>
+      <button onClick={() => this.letsTest()}>ffff </button>
        <div className="container">
        <Header/>
    </div>
@@ -196,18 +201,25 @@ class Index extends Component {
 
 const mapStateToProps = state =>{
     return {
-        menu: state
+        menu : state,
+        token: state.authReducer.token
     }
 }
 
-const mapDispatchToProps = dispatch =>{
+const mapDispatchToProps = (dispatch , props) =>{
      return{
-         fetchdata : async () => 
-         await   axios.get('https://comps-cee0a.firebaseio.com/mrnu.json') 
+         fetchdata : async (token) => {
+               
+                console.log(token, props)
+         await   axios.post('https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=AIzaSyCGo3gnBO7rBthSOWAI1x-cstE749-Gx3g', token) 
          .then(resp => {
             dispatch(actionTypes.FetchStartData(resp.data))
+            console.log(resp.data)
          })
-         
+         .catch(err =>{
+             console.log(err)
+         })
+        }
      }
 }
 
