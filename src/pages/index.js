@@ -4,6 +4,8 @@ import Footer from '../inc/footer';
 import axios from 'axios';
 import {connect} from 'react-redux';
 import * as actionTypes from '../store/actions';
+import ServiceMenu from '../components/serviceMenu/serviceMenu';
+import {Link} from 'react-router-dom'
 
 class Index extends Component {
     componentDidMount(){
@@ -35,17 +37,11 @@ class Index extends Component {
         <div className="col-md-12">
              <div className="col-md-3">
                 <div className="service_aside">
-                  <ul>
-                      <li><a href="#">ყველა სერვისი</a></li>
-                      <li><a href="#">ტექნიკური სერვისი</a></li>
-                      <li><a href="#">პროგრამული სერვისი</a></li>
-                      <li><a href="#">ლეპტოპის შეკეთება</a></li>
-                      <li><a href="#">მობილურების შეკეთება</a></li>
-                  </ul>
+                   <ServiceMenu/>
                  </div>
                  <div className="shop_aside">
                   <ul>
-                      <li><a href="shop.html">ყველა პროდუქცია</a></li>
+                      <li><Link to="/shop">ყველა პროდუქცია</Link></li>
                       <li><a href="#">ლეპტოპის ეკრანები</a></li>
                       <li><a href="#">ლეპტოპის კლავიატურები</a></li>
                       <li><a href="#">მონაცემების მატარებლები</a></li>
